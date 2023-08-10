@@ -56,6 +56,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = mapToEntity(studentDto);
 
         Student studentResponse = studentRepository.save(student);
+        System.out.println("abd");
 
         return mapToDto(studentResponse);
     }
