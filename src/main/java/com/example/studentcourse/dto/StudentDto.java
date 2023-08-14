@@ -1,5 +1,6 @@
 package com.example.studentcourse.dto;
 
+import com.example.studentcourse.annotation.ValidPassword;
 import com.example.studentcourse.model.Course;
 import lombok.*;
 
@@ -15,5 +16,6 @@ public class StudentDto {
     private String name;
     private Integer age;
     private String address;
+    private String email;
     private Set<Course> courses;
 }

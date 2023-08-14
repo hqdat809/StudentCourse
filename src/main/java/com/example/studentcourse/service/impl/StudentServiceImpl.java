@@ -3,33 +3,43 @@ package com.example.studentcourse.service.impl;
 import com.example.studentcourse.dto.StudentDto;
 import com.example.studentcourse.dto.StudentResponse;
 import com.example.studentcourse.model.Course;
+import com.example.studentcourse.model.Role;
 import com.example.studentcourse.model.Student;
 import com.example.studentcourse.repository.CourseRepository;
+import com.example.studentcourse.repository.RoleRepository;
 import com.example.studentcourse.repository.StudentRepository;
-import com.example.studentcourse.service.CourseService;
 import com.example.studentcourse.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
-public class StudentServiceImpl implements StudentService {
+public class StudentServiceImpl implements StudentService, UserDetailsService {
     @Autowired
     StudentRepository studentRepository;
 
     @Autowired
     CourseRepository courseRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public StudentServiceImpl(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     private StudentDto mapToDto(Student student) {
         StudentDto studentDto = new StudentDto();
@@ -38,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
         studentDto.setAddress(student.getAddress());
         studentDto.setName(student.getName());
         studentDto.setCourses(student.getCourses());
+        studentDto.setEmail(student.getEmail());
         return studentDto;
     }
 
@@ -48,15 +59,32 @@ public class StudentServiceImpl implements StudentService {
         student.setAddress(studentDto.getAddress());
         student.setAge(studentDto.getAge());
         student.setCourses(studentDto.getCourses());
+        student.setEmail(studentDto.getEmail());
         return student;
     }
 
     @Override
-    public StudentDto createStudent(StudentDto studentDto) {
-        Student student = mapToEntity(studentDto);
+    public Student saveStudent(Student student) {
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
+        return studentRepository.save(student);
+    }
 
+    @Override
+    public Role saveRole(Role role) {
+        return roleRepository.save(role);
+    }
+
+    @Override
+    public void addRoleToStudent(String studentEmail, String roleName) {
+        Student student = studentRepository.findByEmail(studentEmail).get();
+        Role role = roleRepository.findByName(roleName).get();
+        student.getRoles().add(role);
+        studentRepository.save(student);
+    }
+
+    @Override
+    public StudentDto createStudent(Student student) {
         Student studentResponse = studentRepository.save(student);
-        System.out.println("abd");
 
         return mapToDto(studentResponse);
     }
@@ -99,6 +127,7 @@ public class StudentServiceImpl implements StudentService {
         studentData.setName(studentDto.getName());
         studentData.setAge(studentDto.getAge());
         studentData.setAddress(studentDto.getAddress());
+        studentData.setEmail(studentDto.getEmail());
 
         Student studentUpdated = studentRepository.save(studentData);
 
@@ -120,12 +149,30 @@ public class StudentServiceImpl implements StudentService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND), "Invalid course id "+ courseId));
 
-        student.getCourses().add(course);
+        System.out.println("student course: " + student.getCourses());
+        student.getCourses().stream().forEach(c -> {
+            if (c.getId() == courseId) {
+                throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Student is enrolled this course!!");
+            }
+        });
 
+        student.getCourses().add(course);
 
         Student studentSaved = studentRepository.save(student);
 
         return mapToDto(studentSaved);
 
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Student student = studentRepository.findByEmail(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found student!!"));
+
+        return Student.builder()
+                .id(student.getId())
+                .name(student.getName())
+                .email(student.getUsername())
+                .roles(student.getRoles())
+                .build();
     }
 }

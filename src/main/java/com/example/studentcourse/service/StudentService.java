@@ -2,12 +2,16 @@ package com.example.studentcourse.service;
 
 import com.example.studentcourse.dto.StudentDto;
 import com.example.studentcourse.dto.StudentResponse;
+import com.example.studentcourse.model.Role;
 import com.example.studentcourse.model.Student;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 public interface StudentService {
-    StudentDto createStudent(StudentDto studentDto);
+    Student saveStudent(Student student);
+    Role saveRole(Role role);
+    void addRoleToStudent(String studentEmail, String roleName);
+    StudentDto createStudent(Student student);
 
     StudentDto getStudentById(Integer studentId);
 

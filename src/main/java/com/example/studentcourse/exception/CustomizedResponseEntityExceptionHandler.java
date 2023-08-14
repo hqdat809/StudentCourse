@@ -2,11 +2,17 @@ package com.example.studentcourse.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -36,24 +42,27 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return ResponseEntity.badRequest().body(exceptionResponse);
     }
 
-//    @Override
-//    public final ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-//
-//        BindingResult result = exception.getBindingResult();
-//        List<FieldError> fieldErrors = result.getFieldErrors();
-//
-//        // Create a response containing the error details
+    @Override
+    public final ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        BindingResult result = exception.getBindingResult();
+        List<FieldError> fieldErrors = result.getFieldErrors();
+
+        // Create a response containing the error details
 //        StringBuilder errorMessage = new StringBuilder();
 //        for (FieldError error : fieldErrors) {
 //            errorMessage
 //                    .append(error.getDefaultMessage())
 //                    .append("; ");
 //        }
-//        ExceptionResponse exceptionResponse = new ExceptionResponse(
-//                LocalDateTime.now(),""
-//                + errorMessage, exception.getBindingResult().toString()
-//        );
-//
-//        return ResponseEntity.badRequest().body(exceptionResponse);
-//    }
+        String errorMessage = fieldErrors.get(0).getDefaultMessage();
+
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                LocalDateTime.now(), exception.getStatusCode(),""
+                + errorMessage, exception.getBindingResult().toString()
+        );
+
+        return ResponseEntity.badRequest().body(exceptionResponse);
+    }
+
 }

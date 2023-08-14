@@ -1,26 +1,26 @@
 package com.example.studentcourse.model;
 
+import com.example.studentcourse.annotation.ValidPassword;
 import com.example.studentcourse.dto.CourseDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Student {
+@Builder
+public class Student implements UserDetails{
 /*
     Id
     StudentCode
@@ -37,7 +37,7 @@ public class Student {
     @NotNull(message = "Name shouldn't be null!!")
     @NotBlank(message = "Name shouldn't be blank!!")
     @Size(min = 5, message = "Name should be at least 5 characters")
-    @Size(max = 50, message = "Name should be less than 5 characters")
+    @Size(max = 50, message = "Name should be less than 50 characters")
     private String name;
 
     @NotNull(message = "Age shouldn't be null")
@@ -46,54 +46,68 @@ public class Student {
     private Integer age;
 
     @NotNull(message = "Address shouldn't be null")
-    @NotBlank(message = "Address shouldn't be blank!!")
+    @NotBlank(message = "Address shouldn't be blank!!   ")
     private String address;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @Email(message = "Email is not valid", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @NotEmpty(message = "Email cannot be empty")
+    @Column(unique = true)
+    private String email;
+
+    @JsonIgnore
+//    @ValidPassword(message = "Password is invalid!!")
+    private String password;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "course_student",
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     @JsonIgnore
     private Set<Course> courses = new HashSet<>();
 
-    public Integer getId() {
-        return id;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "student_role",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnore
+    private Set<Role> roles = new HashSet<>();
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Collection< SimpleGrantedAuthority> authorities = new ArrayList<>();
+        roles.stream().forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getName())));
+        return List.of(new SimpleGrantedAuthority(authorities.toString()));
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public String getUsername() {
+        return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public Integer getAge() {
-        return age;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Set<Course> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(Set<Course> courses) {
-        this.courses = courses;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -101,8 +115,9 @@ public class Student {
         return "Student{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", age='" + age + '\'' +
+                ", age=" + age +
                 ", address='" + address + '\'' +
+                ", email='" + email + '\'' +
                 ", courses=" + courses +
                 '}';
     }

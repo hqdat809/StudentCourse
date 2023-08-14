@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
     @Autowired
     CourseRepository courseRepository;
-    StudentRepository studentRepository;
-    StudentService studentService;
 
     private CourseDto mapToDto(Course course) {
         CourseDto courseDto = new CourseDto();
