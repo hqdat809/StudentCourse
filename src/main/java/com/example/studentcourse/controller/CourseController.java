@@ -6,10 +6,12 @@ import com.example.studentcourse.dto.StudentDto;
 import com.example.studentcourse.model.Course;
 import com.example.studentcourse.service.CourseService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +22,7 @@ public class CourseController {
 
     @PostMapping("/course/create")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<CourseDto> createStudent(@Valid @RequestBody CourseDto courseDto) {
+    public ResponseEntity<CourseDto> createCourse(@Valid @RequestBody CourseDto courseDto) {
         return new ResponseEntity<>(courseService.createCourse(courseDto), HttpStatus.CREATED);
     }
 

@@ -87,7 +87,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         role.stream().forEach(r -> set.add(Role.builder().name(r.getName()).build()));
 
-
         student.setRoles(set);
 
         set.stream().forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getName())));

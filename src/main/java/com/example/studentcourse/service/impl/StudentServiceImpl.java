@@ -9,12 +9,12 @@ import com.example.studentcourse.repository.CourseRepository;
 import com.example.studentcourse.repository.RoleRepository;
 import com.example.studentcourse.repository.StudentRepository;
 import com.example.studentcourse.service.StudentService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class StudentServiceImpl implements StudentService, UserDetailsService {
@@ -64,8 +67,9 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
     }
 
     @Override
-    public Student saveStudent(Student student) {
+    public Student  saveStudent(Student student) {
         student.setPassword(passwordEncoder.encode(student.getPassword()));
+        System.out.println("student with password: " + student.getPassword());
         return studentRepository.save(student);
     }
 
@@ -84,7 +88,8 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
 
     @Override
     public StudentDto createStudent(Student student) {
-        Student studentResponse = studentRepository.save(student);
+        System.out.println(student);
+        Student studentResponse = saveStudent(student);
 
         return mapToDto(studentResponse);
     }
@@ -124,12 +129,22 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
         Student studentData = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND), "Invalid student id "+ studentId));
 
-        studentData.setName(studentDto.getName());
-        studentData.setAge(studentDto.getAge());
-        studentData.setAddress(studentDto.getAddress());
-        studentData.setEmail(studentDto.getEmail());
+        if (studentDto.getName() != null) {
+            studentData.setName(studentDto.getName());
+        }
+        if (studentDto.getAge() != null) {
+            studentData.setAge(studentDto.getAge());
+        }
+        if (studentDto.getAddress() != null) {
+            studentData.setAddress(studentDto.getAddress());
+        }
+        if (studentDto.getEmail() != null) {
+            studentData.setEmail(studentDto.getEmail());
+        }
 
         Student studentUpdated = studentRepository.save(studentData);
+
+        System.out.println("student update: " + studentUpdated);
 
         return mapToDto(studentUpdated);
     }
@@ -149,19 +164,24 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND), "Invalid course id "+ courseId));
 
-        System.out.println("student course: " + student.getCourses());
-        student.getCourses().stream().forEach(c -> {
-            if (c.getId() == courseId) {
-                throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Student is enrolled this course!!");
-            }
-        });
+        Set<Course> listCourse = new HashSet<>();
 
-        student.getCourses().add(course);
+        System.out.println("student course: " + student.getCourses());
+        if (student.getCourses() != null && !student.getCourses().isEmpty()) {
+            student.getCourses().stream().forEach(c -> {
+                if (c.getId() == courseId) {
+                    throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Student is enrolled this course!!");
+                }
+                listCourse.add(c);
+            });
+        } else {
+            listCourse.add(course);
+        }
+        student.setCourses(listCourse);
 
         Student studentSaved = studentRepository.save(student);
 
         return mapToDto(studentSaved);
-
     }
 
     @Override

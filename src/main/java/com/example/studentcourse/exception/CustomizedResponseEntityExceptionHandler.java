@@ -48,13 +48,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         BindingResult result = exception.getBindingResult();
         List<FieldError> fieldErrors = result.getFieldErrors();
 
-        // Create a response containing the error details
-//        StringBuilder errorMessage = new StringBuilder();
-//        for (FieldError error : fieldErrors) {
-//            errorMessage
-//                    .append(error.getDefaultMessage())
-//                    .append("; ");
-//        }
         String errorMessage = fieldErrors.get(0).getDefaultMessage();
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(

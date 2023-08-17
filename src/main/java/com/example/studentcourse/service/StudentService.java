@@ -4,8 +4,11 @@ import com.example.studentcourse.dto.StudentDto;
 import com.example.studentcourse.dto.StudentResponse;
 import com.example.studentcourse.model.Role;
 import com.example.studentcourse.model.Student;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 public interface StudentService {
     Student saveStudent(Student student);

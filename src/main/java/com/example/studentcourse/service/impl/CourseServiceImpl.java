@@ -69,7 +69,7 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Course> courseData = courseRepository.findAll(pageable);
 
-//      Map to StudentResponse
+//      Map to CourseResponse
         List<Course> listCourseData = courseData.getContent();
         List<CourseDto> content = new ArrayList<>();
         for (Course course:listCourseData) {
@@ -90,8 +90,10 @@ public class CourseServiceImpl implements CourseService {
     public void deleteCourseById(Integer courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid course id "+ courseId));
-        for (Student student : course.getStudents()) {
-            student.getCourses().remove(course);
+        if (course.getStudents() != null) {
+            for (Student student : course.getStudents()) {
+                student.getCourses().remove(course);
+            }
         }
         courseRepository.delete(course);
     }

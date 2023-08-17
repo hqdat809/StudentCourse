@@ -1,6 +1,5 @@
 package com.example.studentcourse.dto;
 
-import com.example.studentcourse.annotation.ValidPassword;
 import com.example.studentcourse.model.Course;
 import lombok.*;
 
@@ -10,6 +9,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 public class StudentDto {
     private Integer id;

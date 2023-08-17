@@ -5,6 +5,7 @@ import com.example.studentcourse.dto.StudentResponse;
 import com.example.studentcourse.model.Student;
 import com.example.studentcourse.service.StudentService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +14,14 @@ import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
 public class StudentController {
     @Autowired
-    StudentService studentService;
+    private StudentService studentService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/student/create")
@@ -42,11 +44,10 @@ public class StudentController {
     }
 
     @PutMapping("/student/update/{studentId}")
-    @PreAuthorize("hasAuthority('ADMIN') or #studentId == authentication.credentials") // Check studentid same as userLogin's id
-    public ResponseEntity<?> updateStudent(@Valid @RequestBody StudentDto studentDto, @PathVariable Integer studentId ) {
+    @PreAuthorize("hasAuthority('ADMIN') or #studentId == authentication.credentials") // Check studentId same as userLogin's id
+    public ResponseEntity<StudentDto> updateStudent(@Valid @RequestBody StudentDto studentDto, @PathVariable Integer studentId ) {
         return new ResponseEntity<>(studentService.updateStudent(studentDto, studentId), HttpStatus.OK);
     }
-
 
     @DeleteMapping("/student/delete/{studentId}")
     @PreAuthorize("hasAuthority('ADMIN')")
