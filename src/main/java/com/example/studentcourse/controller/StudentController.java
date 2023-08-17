@@ -17,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class StudentController {
@@ -33,6 +35,17 @@ public class StudentController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<StudentDto> getStudentById(@PathVariable Integer studentId) {
         return new ResponseEntity<>(studentService.getStudentById(studentId), HttpStatus.OK);
+    }
+
+    @GetMapping("/student")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<StudentDto>> filterStudent(
+            @RequestParam(value = "name", defaultValue = "", required = false) String name,
+            @RequestParam(value = "age", defaultValue = "", required = false) Integer age,
+            @RequestParam(value = "email", defaultValue = "", required = false) String email,
+            @RequestParam(value = "address", defaultValue = "", required = false) String address)
+    {
+        return new ResponseEntity<>(studentService.filterStudent(name, age, email, address), HttpStatus.OK);
     }
 
     @GetMapping("/students")

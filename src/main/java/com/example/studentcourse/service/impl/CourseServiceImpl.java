@@ -29,6 +29,7 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     CourseRepository courseRepository;
 
+
     private CourseDto mapToDto(Course course) {
         CourseDto courseDto = new CourseDto();
         courseDto.setId(course.getId());
@@ -109,5 +110,20 @@ public class CourseServiceImpl implements CourseService {
         Course updatedCourse = courseRepository.save(courseData);
 
         return mapToDto(updatedCourse);
+    }
+
+    @Override
+    public List<CourseDto> searchCourseByName(String name) {
+        List<Course> courseList = courseRepository.searchCourseByName(name);
+
+        List<CourseDto> courseDtos = new ArrayList<>();
+
+        if (courseList != null && !courseList.isEmpty() ) {
+            for (Course course:courseList) {
+                courseDtos.add(mapToDto(course));
+            }
+        }
+
+        return courseDtos;
     }
 }

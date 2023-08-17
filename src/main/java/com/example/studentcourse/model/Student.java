@@ -41,7 +41,7 @@ public class Student implements UserDetails{
     @NotBlank(message = "Name shouldn't be blank!!")
     private String name;
 
-    @Min(value = 0, message = "Age shouldn't be less than 1!!")
+    @Min(value = 0, message = "Age shouldn't be less than 1")
     @Max(value = 200, message = "Age should be less than 200")
     @NotNull(message = "Age shouldn't be null!!")
     private Integer age;
@@ -50,10 +50,11 @@ public class Student implements UserDetails{
     private String address;
 
     @Email(message = "Email is not valid", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @NotNull(message = "Email shouldn't be null!!")
     @Column(unique = true)
     private String email;
 
-//    @JsonIgnore
+    @JsonBackReference
 //    @ValidPassword(message = "Password is invalid!!")
     private String password;
 

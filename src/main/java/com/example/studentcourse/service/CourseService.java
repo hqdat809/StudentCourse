@@ -5,6 +5,8 @@ import com.example.studentcourse.dto.CourseResponse;
 import com.example.studentcourse.dto.StudentDto;
 import com.example.studentcourse.model.Course;
 
+import java.util.List;
+
 public interface CourseService {
     CourseDto getCourseById(Integer id);
 
@@ -16,4 +18,5 @@ public interface CourseService {
 
     CourseDto updateCourse(Integer courseId, CourseDto courseDto);
 
+    List<CourseDto> searchCourseByName(String name);
 }

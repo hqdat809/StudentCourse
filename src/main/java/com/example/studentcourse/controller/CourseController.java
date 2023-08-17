@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class CourseController {
@@ -30,6 +32,14 @@ public class CourseController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'STUDENT')")
     public ResponseEntity<CourseDto> getCourseById(@PathVariable Integer courseId) {
         return new ResponseEntity<>(courseService.getCourseById(courseId), HttpStatus.OK);
+    }
+
+    @GetMapping("/course")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<CourseDto>> searchCourseByName(
+            @RequestParam(value = "name", defaultValue = "0", required = false) String name
+    ) {
+        return new ResponseEntity<>(courseService.searchCourseByName(name), HttpStatus.OK);
     }
 
     @GetMapping("/courses")

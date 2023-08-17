@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 public interface StudentService {
     Student saveStudent(Student student);
     Role saveRole(Role role);
@@ -25,4 +27,6 @@ public interface StudentService {
     void deleteStudent(Integer studentId);
 
     StudentDto registerForCourse(Integer studentId, Integer courseId);
+
+    List<StudentDto> filterStudent(String name, Integer age, String email, String address);
 }

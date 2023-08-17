@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.rmi.StubNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +69,7 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
 
     @Override
     public Student  saveStudent(Student student) {
+        System.out.println(student.getPassword());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
         System.out.println("student with password: " + student.getPassword());
         return studentRepository.save(student);
@@ -100,6 +102,36 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
                 .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND), "Invalid student id "+ studentId));
 
         return mapToDto(studentData);
+    }
+
+
+    @Override
+    public List<StudentDto> filterStudent(String name, Integer age, String email, String address) {
+        System.out.println("name: "+ name);
+        System.out.println("age: "+ age);
+        System.out.println("email: "+ email);
+        System.out.println("address: "+ address);
+        List<Student> studentData;
+        List<StudentDto> studentDtos = new ArrayList<>();
+
+
+
+        if (age == null) {
+            studentData = studentRepository.filterWithoutAge(name, email, address);
+        } else  {
+            studentData = studentRepository.filterWithAge(name,age , email, address);
+        }
+
+        System.out.println("data: " + studentData.size());
+
+        if (studentData != null && !studentData.isEmpty() ) {
+            for (Student student:studentData) {
+//                System.out.println("student: "+ student);
+//                System.out.println("student course: "+ student.getCourses());
+                studentDtos.add(mapToDto(student));
+            }
+        }
+        return studentDtos;
     }
 
     @Override
@@ -183,6 +215,7 @@ public class StudentServiceImpl implements StudentService, UserDetailsService {
 
         return mapToDto(studentSaved);
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
